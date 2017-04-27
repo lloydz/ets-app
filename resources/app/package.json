@@ -1,0 +1,11 @@
+{
+  "name": "ets",
+  "version": "1.0.0",
+  "description": "email task system",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "zhhj",
+  "license": "ISC"
+}
