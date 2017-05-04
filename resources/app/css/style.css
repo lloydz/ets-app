@@ -1,0 +1,41 @@
+.padding-15 {
+	padding: 15px;
+}
+.pl-15 {
+	padding-left: 15px;
+}
+.pr-15 {
+	padding-right: 15px;
+}
+.pt-15 {
+	padding-top: 15px;
+}
+.pb-15 {
+	padding-bottom: 15px;
+}
+
+.margin-15 {
+	padding: 15px;
+}
+.ml-15 {
+	margin-left: 15px;
+}
+.mr-15 {
+	margin-right: 15px;
+}
+.mt-15 {
+	margin-top: 15px;
+}
+.mb-15 {
+	margin-bottom: 15px;
+}
+
+.ta-left {
+	text-align: left;
+}
+.ta-center {
+	text-align: center;
+}
+.ta-right {
+	text-align: right;
+}

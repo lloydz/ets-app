@@ -1,0 +1,20 @@
+
+@font-face {font-family: "iconfont";
+  url(http://ets.ineln.com/css/iconfont.woff?t=1488964181401) format('woff')
+}
+
+.iconfont {
+  font-family:"iconfont" !important;
+  font-size:24px;
+  font-style:normal;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  -webkit-transition: all 0.5s ease-out 0s;
+  -moz-transition: all 0.5s ease-out 0s;
+  transition: all 0.5s ease-out 0s;
+}
+
+.icon-liebiao:before { content: "\e618"; }
+
+.icon-xinjian:before { content: "\e893"; }
+
