@@ -39,3 +39,19 @@
 .ta-right {
 	text-align: right;
 }
+
+.border-none {
+	border: none;
+}
+.bl-none {
+	border-left: none;
+}
+.br-none {
+	border-right: none;
+}
+.bt-none {
+	border-top: none;
+}
+.bb-none {
+	border-bottom: none;
+}

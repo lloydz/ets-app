@@ -163,9 +163,10 @@
                                 <!-- </div> -->
                             </div>
                         </div>
-                        <div class="part-container">
-                            <div class="part-title">邮件模板配置</div>
+                        <!-- <div class="part-container"> -->
+                            <!-- <div class="part-title">邮件模板配置</div> -->
                             <table>
+                                <tr><th colspan="2" class="ta-left">邮件模板配置</th></tr>
                                 <tr>
                                     <td class="ta-left" style="width:200px;">
                                         <label>Excel文件上传</label>
@@ -209,7 +210,7 @@
                                         <span class="tip-icon" data-tip="提示：如果主题中想包含个性化信息，如：课题名称,请这样输入{{课题名称}}"></span>
                                     </td>
                                     <td>
-                                        <input id="subject" type="text" value="" style="width:100%;text-align:left;" />
+                                        <input id="subject" type="text" value=""  class="field-input" style="width:100%;text-align:left;" />
                                     </td>
                                 </tr>
                                 <tr id="body-tr">
@@ -262,7 +263,7 @@
                                     </td>
                                 </tr>
                             </table>
-                        </div>
+                        <!-- </div> -->
                     </div>
                 </div>
                 <div id="detail-page" v-if="router=='detail-page'"></div>
