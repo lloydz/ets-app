@@ -18,14 +18,16 @@
         overflow: hidden;
     }
     </style>
+    <script>if (typeof module === 'object') {window.module = module; module = undefined;}</script>
     <script type="text/javascript" src="https://at.alicdn.com/t/font_fz0yc9mm1gb0ggb9.js"></script>
     <script type="text/javascript" src="./js/lib/md5.js"></script>
     <script type="text/javascript" src="./js/lib/vue.js"></script>
     <script type="text/javascript" src="./js/lib/vue-resource.js"></script>
     <script type="text/javascript" src="./js/lib/jquery-3.1.1.js"></script>
-    <script type="text/javascript" src="/js/lib/jquery-file-upload/jquery.ui.widget.js"></script>
-    <script type="text/javascript" src="/js/lib/jquery-file-upload/jquery.fileupload.js"></script>
-    <script type="text/javascript" src="/js/lib/base64-min.js"></script>
+    <script type="text/javascript" src="./js/lib/jquery-file-upload/jquery.ui.widget.js"></script>
+    <script type="text/javascript" src="./js/lib/jquery-file-upload/jquery.fileupload.js"></script>
+    <script type="text/javascript" src="./js/lib/base64-min.js"></script>
+    <script>if (window.module) module = window.module;</script>
 </head>
 
 <body>
@@ -108,7 +110,7 @@
                     <div class="pagination-container" v-if="tasks.pages>1">
                         <ul class="pagination">
                             <li class="prev" :class="{disabled: (tasks.currentPage==1)}" @click="getTaskList(tasks.currentPage-1)"><span>«</span></li>
-                            <li v-for="p in tasks.pages" :class="{active: (tasks.currentPage==p)}" @click="getTaskList(p)"><span>{{p}}</span></li>
+                            <li v-for="p in tasks.pages" :class="{active: (tasks.currentPage==p)}" @click="getTaskList(p)"><span v-html="p"></span></li>
                             <li class="next" :class="{disabled: (tasks.currentPage==tasks.pages)}" @click="getTaskList(tasks.currentPage+1)"><span>»</span></li>
                         </ul>
                     </div>
@@ -127,21 +129,25 @@
                             </div>
                         </div>
                         <div class="part-container">
-                            <div class="part-title">发件服务器配置</div>
+                            <div class="part-title">
+                                <label>发件服务器配置</label>
+                                <span class="tip-icon" data-tip="提示：输入发件邮箱后会自动识别SMTP服务器和端口，但自动识别的结果未必完全正确，
+          建议点击右侧的测试按钮，以测试配置是否正确"></span>
+                            </div>
                             <div class="part-fields">
                                 <!-- <div class="field-row"> -->
                                 <div class="field-item half-width pr-15">
                                     <div class="field-desc">
                                         <label>发件邮箱</label><span class="required">*</span></div>
                                     <div>
-                                        <input type="text" class="field-input" v-model="task.name" />
+                                        <input type="text" class="field-input" v-model="task.sender.email" @blur="autoSmtpPort()" />
                                     </div>
                                 </div>
                                 <div class="field-item half-width pl-15">
                                     <div class="field-desc">
                                         <label>邮箱密码</label><span class="required">*</span></div>
                                     <div>
-                                        <input type="password" class="field-input" v-model="task.name" />
+                                        <input type="password" class="field-input" v-model="task.sender.password" />
                                     </div>
                                 </div>
                                 <!-- </div> -->
@@ -150,37 +156,111 @@
                                     <div class="field-desc">
                                         <label>SMTP服务器</label><span class="required">*</span></div>
                                     <div>
-                                        <input type="text" class="field-input" v-model="task.name" />
+                                        <input type="text" class="field-input" v-model="task.sender.smtp" />
                                     </div>
                                 </div>
                                 <div class="field-item half-width pl-15 mt-15">
                                     <div class="field-desc">
                                         <label>端口</label><span class="required">*</span></div>
                                     <div>
-                                        <input type="text" class="field-input" v-model="task.name" />
+                                        <input type="text" class="field-input" v-model="task.sender.port" />
                                     </div>
                                 </div>
                                 <!-- </div> -->
                             </div>
                         </div>
                         <!-- <div class="part-container"> -->
-                            <!-- <div class="part-title">邮件模板配置</div> -->
-                            <table>
-                                <tr><th colspan="2" class="ta-left">邮件模板配置</th></tr>
-                                <tr>
-                                    <td class="ta-left" style="width:200px;">
-                                        <label>Excel文件上传</label>
-                                        <span class="required">*</span>
-                                        <span class="tip-icon" data-tip="提示：此Excel文件应包含收件人邮箱列，以及待发送邮件中的个性化信息列，如单位名称、课题名称、课题编号等"></span>
-                                        <!--          <div class="tip">(提示：此Excel文件应包含收件人邮箱列，以及待发送邮件中的个性化信息列，如单位名称、课题名称、课题编号等)</div> -->
-                                    </td>
-                                    <td class="ta-left" style="text-align:left;">
+                        <!-- <div class="part-title">邮件模板配置</div> -->
+                        <table class="form-table">
+                            <tr>
+                                <th colspan="2" class="table-title ta-left">邮件模板配置</th>
+                            </tr>
+                            <tr>
+                                <td class="ta-left" style="width:200px;">
+                                    <label>Excel文件上传</label>
+                                    <span class="required">*</span>
+                                    <span class="tip-icon" data-tip="提示：此Excel文件应包含收件人邮箱列，以及待发送邮件中的个性化信息列，如单位名称、课题名称、课题编号等"></span>
+                                    <!--          <div class="tip">(提示：此Excel文件应包含收件人邮箱列，以及待发送邮件中的个性化信息列，如单位名称、课题名称、课题编号等)</div> -->
+                                </td>
+                                <td class="ta-left" style="text-align:left;">
+                                    <div class="file-upload-container">
+                                        <span class="file-upload-button">
+                                        <span>+选择文件</span>
+                                        <input id="excel-upload" type="file" name="file" accept=".csv, application/vnd.openxmlformats-officedocument.spreadsheetml.sheet, application/vnd.ms-excel" />
+                                        </span>
+                                        <div id="excel-upload-progress" class="progress">
+                                            <!-- <span style="flex: 0 0 65px;">上传进度：</span> -->
+                                            <div class="progress-bar">
+                                                <div class="progress-bar-success"></div>
+                                            </div>
+                                            <span class="progress-percentage" style="flex: 0 0 40px;"></span>
+                                        </div>
+                                    </div>
+                                </td>
+                            </tr>
+                            <tr id="to-tr" :class="{disabled: !excel.uploaded}">
+                                <td class="ta-left">
+                                    <label>收件人</label>
+                                    <span class="required">*</span>
+                                </td>
+                                <td class="ta-left">
+                                    <fieldset>
+                                        <legend>
+                                            请选择所上传Excel文件中的对应收件人的列
+                                        </legend>
+                                        <div id="to-list" class="radio-list">
+                                          <div class="radio" v-for="(title, key) in excel.titles"><input type="radio" name="to" :value="key"><label v-html="title"></label></div>
+                                        </div>
+                                    </fieldset>
+                                </td>
+                            </tr>
+                            <tr id="subject-tr" :class="{disabled: !excel.uploaded}">
+                                <td class="ta-left">
+                                    <label>邮件主题</label>
+                                    <span class="tip-icon" data-tip="提示：如果主题中想包含个性化信息，如：课题名称,请这样输入<%课题名称%>"></span>
+                                </td>
+                                <td>
+                                    <input id="subject" type="text" value="" class="field-input" style="width:100%;text-align:left;" />
+                                </td>
+                            </tr>
+                            <tr id="body-tr" :class="{disabled: !excel.uploaded}">
+                                <td id="body-title-td" class="ta-left">
+                                    <label>邮件正文</label>
+                                    <span class="tip-icon" data-width="300px" data-tip="提示：如果正文中想包含个性化信息，如：课题名称,请这样输入<%课题名称%>；
+                      如果需要对个性化信息进行样式选择，如：加粗、调整字体大小颜色,请对个性化信息整体（包含左右的双大括号）选中后进行样式操作；双大括号和其中的个性化信息请手动输入，尽量不要复制粘贴，否则可能会影响显示样式"></span>
+                                </td>
+                                <td id="body-content-td">
+                                    <div style="height: 339px; line-height: 339px;">
+                                        <input type="hidden" name="body" class="ewebeditor_hide_ipt" />
+                                        <iframe class="editor_iframe" ID="iframe_editor_body" src="/editor/ewebeditor.htm?id=body&style=coolblue" frameborder="0" scrolling="no" width="100%" height="300"></iframe>
+                                    </div>
+                                </td>
+                            </tr>
+                            <tr id="has-attachment-tr" :class="{disabled: !excel.uploaded}">
+                                <td class="ta-left">
+                                    <label>是否发送附件</label>
+                                    <span class="required">*</span>
+                                </td>
+                                <td class="ta-left" style="text-align:left;">
+                                    <div class="radio-list" style="margin-bottom: 15px; margin-top: 15px;">
+                                        <input type="radio" name="attachment_type" value="0" />不发送附件
+                                        <input type="radio" name="attachment_type" value="1" style="margin-left:50px;" />给所有的收件人发送的附件相同
+                                        <input type="radio" name="attachment_type" value="2" style="margin-left:50px;" />给不同的收件人发送的附件不同
+                                        <span class="tip-icon" data-tip="提示：如果给不同的收件人发送的附件不同，附件名称应对应所上传Excel文件中的某一列"></span>
+                                    </div>
+                                    <div id="attachment-setting" style="display: none;">
+                                        <fieldset id="attachment-fieldset" style="display: none;">
+                                            <legend>
+                                                请选择所上传Excel文件中的对应附件名称的列
+                                            </legend>
+                                            <div id="attachment-excel-col" class="radio-list"></div>
+                                        </fieldset>
                                         <div class="file-upload-container">
                                             <span class="file-upload-button">
-                                        <span>+选择文件</span>
-                                            <input id="excel-upload" type="file" name="file" accept=".csv, application/vnd.openxmlformats-officedocument.spreadsheetml.sheet, application/vnd.ms-excel" />
+                                        <span>+上传附件</span>
+                                            <input id="attachment-upload" type="file" name="attachments[]" multiple/>
                                             </span>
-                                            <div id="excel-upload-progress" class="progress">
+                                            <div id="attachment-upload-progress" class="progress">
                                                 <span>上传进度：</span>
                                                 <div class="progress-bar">
                                                     <div class="progress-bar-success"></div>
@@ -188,81 +268,11 @@
                                                 <span class="progress-percentage"></span>
                                             </div>
                                         </div>
-                                    </td>
-                                </tr>
-                                <tr id="to-tr" class="disabled">
-                                    <td class="ta-left">
-                                        <label>收件人</label>
-                                        <span class="required">*</span>
-                                    </td>
-                                    <td class="ta-left">
-                                        <fieldset>
-                                            <legend>
-                                                请选择所上传Excel文件中的对应收件人的列
-                                            </legend>
-                                            <div id="to-list" class="radio-list"></div>
-                                        </fieldset>
-                                    </td>
-                                </tr>
-                                <tr id="subject-tr" class="disabled">
-                                    <td class="ta-left">
-                                        <label>邮件主题</label>
-                                        <span class="tip-icon" data-tip="提示：如果主题中想包含个性化信息，如：课题名称,请这样输入{{课题名称}}"></span>
-                                    </td>
-                                    <td>
-                                        <input id="subject" type="text" value=""  class="field-input" style="width:100%;text-align:left;" />
-                                    </td>
-                                </tr>
-                                <tr id="body-tr">
-                                    <td id="body-title-td" class="ta-left disabled">
-                                        <label>邮件正文</label>
-                                        <span class="tip-icon" data-width="300px" data-tip="提示：如果正文中想包含个性化信息，如：课题名称,请这样输入{{课题名称}}；
-                      如果需要对个性化信息进行样式选择，如：加粗、调整字体大小颜色,请对个性化信息整体（包含左右的双大括号）选中后进行样式操作；双大括号和其中的个性化信息请手动输入，尽量不要复制粘贴，否则可能会影响显示样式"></span>
-                                    </td>
-                                    <td id="body-content-td" class="disabled">
-                                        <div style="height: 339px; line-height: 339px;">
-                                            <input type="hidden" name="body" class="ewebeditor_hide_ipt" />
-                                            <iframe class="editor_iframe" ID="iframe_editor_body" src="/editor/ewebeditor.htm?id=body&style=coolblue" frameborder="0" scrolling="no" width="100%" height="300"></iframe>
-                                        </div>
-                                    </td>
-                                </tr>
-                                <tr id="has-attachment-tr" class="disabled">
-                                    <td class="ta-left">
-                                        <label>是否发送附件</label>
-                                        <span class="required">*</span>
-                                    </td>
-                                    <td class="ta-left" style="text-align:left;">
-                                        <div class="radio-list" style="margin-bottom: 15px; margin-top: 15px;">
-                                            <input type="radio" name="attachment_type" value="0" />不发送附件
-                                            <input type="radio" name="attachment_type" value="1" style="margin-left:50px;" />给所有的收件人发送的附件相同
-                                            <input type="radio" name="attachment_type" value="2" style="margin-left:50px;" />给不同的收件人发送的附件不同
-                                            <span class="tip-icon" data-tip="提示：如果给不同的收件人发送的附件不同，附件名称应对应所上传Excel文件中的某一列"></span>
-                                        </div>
-                                        <div id="attachment-setting" style="display: none;">
-                                            <fieldset id="attachment-fieldset" style="display: none;">
-                                                <legend>
-                                                    请选择所上传Excel文件中的对应附件名称的列
-                                                </legend>
-                                                <div id="attachment-excel-col" class="radio-list"></div>
-                                            </fieldset>
-                                            <div class="file-upload-container">
-                                                <span class="file-upload-button">
-                                        <span>+上传附件</span>
-                                                <input id="attachment-upload" type="file" name="attachments[]" multiple/>
-                                                </span>
-                                                <div id="attachment-upload-progress" class="progress">
-                                                    <span>上传进度：</span>
-                                                    <div class="progress-bar">
-                                                        <div class="progress-bar-success"></div>
-                                                    </div>
-                                                    <span class="progress-percentage"></span>
-                                                </div>
-                                            </div>
-                                        </div>
-                                        <input id="attachment-excel-col" type="text" style="display:none;text-align:left;width:80%;" placeholder="请输入附件名对应在Excel文件中的列" />
-                                    </td>
-                                </tr>
-                            </table>
+                                    </div>
+                                    <input id="attachment-excel-col" type="text" style="display:none;text-align:left;width:80%;" placeholder="请输入附件名对应在Excel文件中的列" />
+                                </td>
+                            </tr>
+                        </table>
                         <!-- </div> -->
                     </div>
                 </div>
@@ -272,14 +282,113 @@
         <footer>Copyright©2009-2017 上海鹰谷信息科技有限公司 版权所有 沪ICP备13029136号</footer>
     </div>
     <script type="text/javascript">
+    $(document).ready(function() {
+        // 生成Excel标题单选框
+        function generateRadiosHtml(radios, name) {
+            var radioHtml = '';
+            for(var key in radios) {
+                radioHtml += '<div class="radio">';
+                radioHtml += '<input type="radio" name="'+name+'" value="'+key+'"/><label>'+radios[key]+'</label>';
+                radioHtml += '</div>';
+            }
+            return radioHtml;
+        }
+
+        // Excel文件上传
+        $('#excel-upload').fileupload({
+            url: 'http://dev.ets.integle.com/client-api/upload-excel',
+            dataType: 'json',
+            formData: {
+                'is_attachment': 0
+            },
+            start: function(e) {
+                app.excel.uploaded = false;
+                $('#excel-upload-progress .progress-bar-success').css('width', '0%');
+                $('#excel-upload-progress .progress-percentage').html('0%');
+                $('#excel-upload-progress').css('display', 'flex');
+            },
+            done: function(e, data) {
+                var result = data.result;
+                if (result.status == 1) {
+                    app.excel.uploaded = true;
+                    app.excel.titles = result.data.titles;
+
+                    $('#excel-upload-progress .progress-bar-success').css('width', '100%');
+                    $('#excel-upload-progress .progress-percentage').html('100%');
+
+                    $('#excel-upload').attr('task_dir', result.data.task_dir);
+                    $('#excel-upload').attr('file_name', result.data.file_name);
+                    // $('#to-list').html(generateRadiosHtml(result.data.titles, 'to'));
+                    // $('#attachment-excel-col').html(generateRadiosHtml(result.data.titles, 'attachment_excel_col'));
+
+                    $('#attachment-upload').fileupload({
+                        formData: {
+                            'is_attachment': 1,
+                            'PHP_SESSION_UPLOAD_PROGRESS': 'xyz',
+                            'task_dir': result.data.task_dir
+                        }
+                    });
+                    // $('#to-tr, #subject-tr, #body-title-td, #body-content-td, #has-attachment-tr').removeClass('disabled');
+                } else {
+                    $.showAlert('Excel文件上传失败');
+                }
+            },
+            progressall: function(e, data) {
+                var progress = parseInt(data.loaded / data.total * 100, 10);
+                if (progress > 0) {
+                    progress = progress - 1;
+                }
+                $('#excel-upload-progress .progress-bar-success').css('width', progress + '%');
+                $('#excel-upload-progress .progress-percentage').html(progress + '%');
+            }
+        });
+
+        // 附件上传
+        $('#attachment-upload').fileupload({
+            url: '/email-task/ajax-file-upload',
+            dataType: 'json',
+            start: function(e) {
+                $('#attachment-upload-progress .progress-bar-success').css('width', '0%');
+                $('#attachment-upload-progress .progress-percentage').html('0%');
+                $('#attachment-upload-progress').css('display', 'inline-block');
+            },
+            done: function(e, data) {
+                console.log('********************');
+                var result = data.result;
+                if (result.status != 1) {}
+            },
+            progressall: function(e, data) {
+                fetchUploadProgress();
+                var progress = parseInt(data.loaded / data.total * 100, 10);
+                $('#attachment-upload-progress .progress-bar-success').css('width', progress + '%');
+                $('#attachment-upload-progress .progress-percentage').html(progress + '%');
+            }
+        });
+    });
+
     const TASKS_PER_PAGE = 10;
     const TASK_STATUS = ['无效', '未提交', '未开始', '进行中', '已完成'];
-    new Vue({
+    var app = new Vue({
         el: '#app',
         data: {
             router: 'create-page',
+            excel: {
+              uploaded: false,
+              titles: {}
+            },
             task: {
                 name: '',
+                sender: {
+                  email: '',
+                  password: '',
+                  smtp: '',
+                  port: ''
+                },
+                template: {
+                  to: '',
+                  subject: '',
+                  body: ''
+                }
             },
             tasks: {
                 total: 0,
@@ -304,7 +413,7 @@
                 this.getTaskList();
             },
             getTaskList(page) {
-                this.$http.jsonp('http://dev.ets.integle.com/api/list-tasks', {
+                this.$http.get('http://dev.ets.integle.com/client-api/list-tasks', {
                     params: {
                         account: 'huajun.h.zhu@integle.com',
                         password: hex_md5('yg123456'),
@@ -334,6 +443,20 @@
                 }
                 return ((task.succeed_emails / 1 + task.failed_emails / 1) / task.total_emails * 100).toFixed(2) + '%';
             },
+            autoSmtpPort() {
+              var email = this.task.sender.email;
+              // 验证Email格式
+              var re = /^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/;
+              if(!re.test(email)) {
+                  alert('xxxxxxxxxxxxxxxx');
+                  return false;
+              }
+
+              var arr = email.split('@');
+              var company = arr[1].substr(0, arr[1].indexOf('.'));
+              this.task.sender.smtp = 'smtp.' + company + '.com';
+              this.task.sender.port = 25;
+            }
         },
         mounted() {
             this.$nextTick(() => {
