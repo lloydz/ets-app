@@ -8,7 +8,9 @@
     <link rel="stylesheet" type="text/css" href="./css/index.css">
     <link rel="stylesheet" type="text/css" href="./css/task-list.css">
     <link rel="stylesheet" type="text/css" href="./css/task-form.css">
+    <link rel="stylesheet" type="text/css" href="umeditor/themes/default/_css/umeditor.css">
     <link rel="stylesheet" type="text/css" href="./css/style.css">
+    <link rel="stylesheet" type="text/css" href="./css/login.css">
     <style type="text/css">
     .icon {
         width: 1em;
@@ -18,7 +20,12 @@
         overflow: hidden;
     }
     </style>
-    <script>if (typeof module === 'object') {window.module = module; module = undefined;}</script>
+    <script>
+    if (typeof module === 'object') {
+        window.module = module;
+        module = undefined;
+    }
+    </script>
     <script type="text/javascript" src="https://at.alicdn.com/t/font_fz0yc9mm1gb0ggb9.js"></script>
     <script type="text/javascript" src="./js/lib/md5.js"></script>
     <script type="text/javascript" src="./js/lib/vue.js"></script>
@@ -27,7 +34,20 @@
     <script type="text/javascript" src="./js/lib/jquery-file-upload/jquery.ui.widget.js"></script>
     <script type="text/javascript" src="./js/lib/jquery-file-upload/jquery.fileupload.js"></script>
     <script type="text/javascript" src="./js/lib/base64-min.js"></script>
-    <script>if (window.module) module = window.module;</script>
+    <script type="text/javascript" src="./js/common.js"></script>
+    <script type="text/javascript" src="./js/modal.js"></script>
+    <script>
+    if (window.module) module = window.module;
+    </script>
+    <!-- <script type="text/javascript" src="umeditor/third-party/jquery.min.js"></script> -->
+    <script type="text/javascript" src="umeditor/third-party/template.min.js"></script>
+    <script type="text/javascript" src="umeditor/umeditor.config.js"></script>
+    <script type="text/javascript" src="umeditor/editor_api.js"></script>
+    <script type="text/javascript" src="umeditor/lang/zh-cn/zh-cn.js"></script>
+    <!-- 引入样式 -->
+    <link rel="stylesheet" href="https://unpkg.com/element-ui/lib/theme-default/index.css">
+    <!-- 引入组件库 -->
+    <script src="https://unpkg.com/element-ui/lib/index.js"></script>
 </head>
 
 <body>
@@ -55,7 +75,7 @@
                 </div>
                 <div class="sidebar-nav">
                     <ul>
-                        <li id="list-tasks" @click="listTasks()">
+                        <li id="list-tasks" @click="getTaskList(1)">
                             <!-- <div> -->
                             <div class="icon-list">
                                 <svg class="icon" aria-hidden="true">
@@ -70,12 +90,12 @@
             </div>
             <div class="main">
                 <div class="main-top-nav">
-                    <a href="javascript:;" class="tab" :class="{active: (router=='list-page')}" @click="listTasks()">我的任务</a>
-                    <a href="javascript:;" class="tab active" v-show="router=='create-page'" style="display: none;">新建任务</a>
-                    <a href="javascript:;" class="tab active" v-show="router=='detail-page'" style="display: none;">任务详情</a>
+                    <a href="javascript:;" class="tab" :class="{active: (router==='list-page')}" @click="getTaskList(1)">我的任务</a>
+                    <a href="javascript:;" class="tab active" v-show="router==='create-page'" style="display: none;">新建任务</a>
+                    <a href="javascript:;" class="tab active" v-show="router==='detail-page'" style="display: none;">任务详情</a>
                 </div>
-                <div id="list-page" v-if="router=='list-page'">
-                    <table class="odd-even">
+                <div id="list-page" v-if="router==='list-page'">
+                    <table class="odd-even" v-loading="loadingList">
                         <thead>
                             <tr>
                                 <th>任务名称</th>
@@ -88,34 +108,36 @@
                                 <th>操作</th>
                             </tr>
                         </thead>
-                        <tr v-if="tasks.taskArr.length==0">
-                            <td colspan="8">
-                                您还没有任务 <a href="javascript:;" @click="createTask()">新建任务</a>
-                            </td>
-                        </tr>
-                        <tr v-for="task in tasks.taskArr">
-                            <td v-html="task.name"></td>
-                            <td v-html="taskStatus[task.status]"></td>
-                            <td v-html="(task.status<=2) ? '--' : task.total_emails"></td>
-                            <td v-html="showTaskProgress(task)"></td>
-                            <td v-html="(task.status<=2) ? '--' : task.succeed_emails"></td>
-                            <td v-html="(task.status<=2) ? '--' : task.failed_emails"></td>
-                            <td v-html="task.create_time"></td>
-                            <td>
-                                <a class="btn" action="del-task" v-if="task.status<=2" @click="delTask(task.id)">删除任务</a>
-                                <a class="btn" v-if="task.status>2" @click="showDetail(task.id)">查看详情</a>
-                            </td>
-                        </tr>
+                        <tbody>
+                            <tr v-if="tasks.taskArr.length===0">
+                                <td colspan="8">
+                                    您还没有任务 <a href="javascript:;" @click="createTask()">新建任务</a>
+                                </td>
+                            </tr>
+                            <tr v-for="task in tasks.taskArr">
+                                <td v-html="task.name"></td>
+                                <td v-html="taskStatus[task.status]"></td>
+                                <td v-html="(task.status<=2) ? '--' : task.total_emails"></td>
+                                <td v-html="showTaskProgress(task)"></td>
+                                <td v-html="(task.status<=2) ? '--' : task.succeed_emails"></td>
+                                <td v-html="(task.status<=2) ? '--' : task.failed_emails"></td>
+                                <td v-html="task.create_time"></td>
+                                <td>
+                                    <a class="btn" action="del-task" v-if="task.status<=2" @click="delTask(task.id)">删除任务</a>
+                                    <a class="btn" action="view-detail" v-if="task.status>2" @click="showDetail(task.id, 1)">查看详情</a>
+                                </td>
+                            </tr>
+                        </tbody>
                     </table>
                     <div class="pagination-container" v-if="tasks.pages>1">
                         <ul class="pagination">
-                            <li class="prev" :class="{disabled: (tasks.currentPage==1)}" @click="getTaskList(tasks.currentPage-1)"><span>«</span></li>
-                            <li v-for="p in tasks.pages" :class="{active: (tasks.currentPage==p)}" @click="getTaskList(p)"><span v-html="p"></span></li>
-                            <li class="next" :class="{disabled: (tasks.currentPage==tasks.pages)}" @click="getTaskList(tasks.currentPage+1)"><span>»</span></li>
+                            <li class="prev" :class="{disabled: (tasks.currentPage===1)}" @click="getTaskList(tasks.currentPage-1)"><span>«</span></li>
+                            <li v-for="p in tasks.pages" :class="{active: (tasks.currentPage===p)}" @click="getTaskList(p)"><span v-html="p"></span></li>
+                            <li class="next" :class="{disabled: (tasks.currentPage===tasks.pages)}" @click="getTaskList(tasks.currentPage+1)"><span>»</span></li>
                         </ul>
                     </div>
                 </div>
-                <div id="create-page" v-if="router=='create-page'">
+                <div id="create-page" v-show="router==='create-page'" style="display: none;">
                     <div class="task-form">
                         <div class="part-container">
                             <div class="part-fields">
@@ -128,26 +150,26 @@
                                 </div>
                             </div>
                         </div>
-                        <div class="part-container">
+                        <div class="part-container" v-loading="fullscreenLoading" element-loading-text="正在测试发件服务器配置...">
                             <div class="part-title">
                                 <label>发件服务器配置</label>
-                                <span class="tip-icon" data-tip="提示：输入发件邮箱后会自动识别SMTP服务器和端口，但自动识别的结果未必完全正确，
-          建议点击右侧的测试按钮，以测试配置是否正确"></span>
+                                <span class="tip-icon" data-tip="提示：输入发件邮箱后会自动识别SMTP服务器和端口，但自动识别的结果未必完全正确，建议点击右侧的测试按钮，以测试配置是否正确"></span>
                             </div>
+                            <div class="test-btn" @click="testSender()">测试发件服务器配置</div>
                             <div class="part-fields">
                                 <!-- <div class="field-row"> -->
                                 <div class="field-item half-width pr-15">
                                     <div class="field-desc">
                                         <label>发件邮箱</label><span class="required">*</span></div>
                                     <div>
-                                        <input type="text" class="field-input" v-model="task.sender.email" @blur="autoSmtpPort()" />
+                                        <input type="text" class="field-input" v-model="task.sender.sender_email" @blur="autoSmtpPort()" @change="autoSmtpPort()" />
                                     </div>
                                 </div>
                                 <div class="field-item half-width pl-15">
                                     <div class="field-desc">
                                         <label>邮箱密码</label><span class="required">*</span></div>
                                     <div>
-                                        <input type="password" class="field-input" v-model="task.sender.password" />
+                                        <input type="password" class="field-input" v-model="task.sender.sender_email_password" />
                                     </div>
                                 </div>
                                 <!-- </div> -->
@@ -176,11 +198,10 @@
                                 <th colspan="2" class="table-title ta-left">邮件模板配置</th>
                             </tr>
                             <tr>
-                                <td class="ta-left" style="width:200px;">
+                                <td class="ta-left" style="min-width:200px;">
                                     <label>Excel文件上传</label>
                                     <span class="required">*</span>
                                     <span class="tip-icon" data-tip="提示：此Excel文件应包含收件人邮箱列，以及待发送邮件中的个性化信息列，如单位名称、课题名称、课题编号等"></span>
-                                    <!--          <div class="tip">(提示：此Excel文件应包含收件人邮箱列，以及待发送邮件中的个性化信息列，如单位名称、课题名称、课题编号等)</div> -->
                                 </td>
                                 <td class="ta-left" style="text-align:left;">
                                     <div class="file-upload-container">
@@ -189,7 +210,6 @@
                                         <input id="excel-upload" type="file" name="file" accept=".csv, application/vnd.openxmlformats-officedocument.spreadsheetml.sheet, application/vnd.ms-excel" />
                                         </span>
                                         <div id="excel-upload-progress" class="progress">
-                                            <!-- <span style="flex: 0 0 65px;">上传进度：</span> -->
                                             <div class="progress-bar">
                                                 <div class="progress-bar-success"></div>
                                             </div>
@@ -209,7 +229,10 @@
                                             请选择所上传Excel文件中的对应收件人的列
                                         </legend>
                                         <div id="to-list" class="radio-list">
-                                          <div class="radio" v-for="(title, key) in excel.titles"><input type="radio" name="to" :value="key"><label v-html="title"></label></div>
+                                            <div class="radio" v-for="(title, key) in excel.titles">
+                                                <input type="radio" name="to" :value="key" @click="task.template.to_excel_col=key">
+                                                <label v-html="title"></label>
+                                            </div>
                                         </div>
                                     </fieldset>
                                 </td>
@@ -220,7 +243,7 @@
                                     <span class="tip-icon" data-tip="提示：如果主题中想包含个性化信息，如：课题名称,请这样输入<%课题名称%>"></span>
                                 </td>
                                 <td>
-                                    <input id="subject" type="text" value="" class="field-input" style="width:100%;text-align:left;" />
+                                    <input id="subject" type="text" v-model="task.template.subject" class="field-input" style="width:100%;text-align:left;" />
                                 </td>
                             </tr>
                             <tr id="body-tr" :class="{disabled: !excel.uploaded}">
@@ -229,11 +252,8 @@
                                     <span class="tip-icon" data-width="300px" data-tip="提示：如果正文中想包含个性化信息，如：课题名称,请这样输入<%课题名称%>；
                       如果需要对个性化信息进行样式选择，如：加粗、调整字体大小颜色,请对个性化信息整体（包含左右的双大括号）选中后进行样式操作；双大括号和其中的个性化信息请手动输入，尽量不要复制粘贴，否则可能会影响显示样式"></span>
                                 </td>
-                                <td id="body-content-td">
-                                    <div style="height: 339px; line-height: 339px;">
-                                        <input type="hidden" name="body" class="ewebeditor_hide_ipt" />
-                                        <iframe class="editor_iframe" ID="iframe_editor_body" src="/editor/ewebeditor.htm?id=body&style=coolblue" frameborder="0" scrolling="no" width="100%" height="300"></iframe>
-                                    </div>
+                                <td id="body-content-td" class="ta-left">
+                                    <textarea id="bodyEditor" style="width:100%;height:240px;"></textarea>
                                 </td>
                             </tr>
                             <tr id="has-attachment-tr" :class="{disabled: !excel.uploaded}">
@@ -243,17 +263,22 @@
                                 </td>
                                 <td class="ta-left" style="text-align:left;">
                                     <div class="radio-list" style="margin-bottom: 15px; margin-top: 15px;">
-                                        <input type="radio" name="attachment_type" value="0" />不发送附件
-                                        <input type="radio" name="attachment_type" value="1" style="margin-left:50px;" />给所有的收件人发送的附件相同
-                                        <input type="radio" name="attachment_type" value="2" style="margin-left:50px;" />给不同的收件人发送的附件不同
+                                        <input type="radio" name="attachment_type" value="0" @click="task.template.attachment_type=0" />不发送附件
+                                        <input type="radio" name="attachment_type" value="1" @click="task.template.attachment_type=1" style="margin-left:50px;" />给所有的收件人发送的附件相同
+                                        <input type="radio" name="attachment_type" value="2" @click="task.template.attachment_type=2" style="margin-left:50px;" />给不同的收件人发送的附件不同
                                         <span class="tip-icon" data-tip="提示：如果给不同的收件人发送的附件不同，附件名称应对应所上传Excel文件中的某一列"></span>
                                     </div>
-                                    <div id="attachment-setting" style="display: none;">
-                                        <fieldset id="attachment-fieldset" style="display: none;">
+                                    <div id="attachment-setting" v-show="task.template.attachment_type!=0">
+                                        <fieldset id="attachment-fieldset" v-show="task.template.attachment_type===2">
                                             <legend>
                                                 请选择所上传Excel文件中的对应附件名称的列
                                             </legend>
-                                            <div id="attachment-excel-col" class="radio-list"></div>
+                                            <div id="attachment-excel-col" class="radio-list">
+                                                <div class="radio" v-for="(title, key) in excel.titles">
+                                                    <input type="radio" name="attachment_excel_col" :value="key" @click="task.template.attachment_excel_col=key">
+                                                    <label v-html="title"></label>
+                                                </div>
+                                            </div>
                                         </fieldset>
                                         <div class="file-upload-container">
                                             <span class="file-upload-button">
@@ -261,7 +286,6 @@
                                             <input id="attachment-upload" type="file" name="attachments[]" multiple/>
                                             </span>
                                             <div id="attachment-upload-progress" class="progress">
-                                                <span>上传进度：</span>
                                                 <div class="progress-bar">
                                                     <div class="progress-bar-success"></div>
                                                 </div>
@@ -269,26 +293,79 @@
                                             </div>
                                         </div>
                                     </div>
-                                    <input id="attachment-excel-col" type="text" style="display:none;text-align:left;width:80%;" placeholder="请输入附件名对应在Excel文件中的列" />
                                 </td>
                             </tr>
                         </table>
+                        <div class="form-bottom">
+                            <div class="create-btn" @click="create()">新建任务</div>
+                        </div>
                         <!-- </div> -->
                     </div>
                 </div>
-                <div id="detail-page" v-if="router=='detail-page'"></div>
+                <div id="detail-page" v-show="router==='detail-page'" style="display: none;">
+                    <div class="detail-container">
+                        <div v-html="detail.taskName" style=" height: 45px; font-size: 16px; line-height: 45px; text-align: center; font-weight: bold; background-color: #d27373;"></div>
+                        <table class=" odd-even ">
+                            <thead>
+                                <tr>
+                                    <th style="width:100px; ">序号</th>
+                                    <th>收件人</th>
+                                    <th>状态</th>
+                                </tr>
+                                <tr v-for="(item, index) in detail.results ">
+                                    <td v-text="index "></td>
+                                    <td v-text="item.to "></td>
+                                    <td v-text="showResultStatus(item) "></td>
+                                </tr>
+                            </thead>
+                        </table>
+                        <div class="pagination-container">
+                            <el-pagination :current-page="2" :page-size="100" layout="total, prev, pager, next, jumper" :total="400">
+                            </el-pagination>
+                        </div>
+                    </div>
+                </div>
+                <div class="center-alert " v-if="errMsg !='' ">
+                    <template>
+                        <el-alert :title="errMsg " type="error " show-icon :closable="false "></el-alert>
+                    </template>
+                </div>
             </div>
         </center>
         <footer>Copyright©2009-2017 上海鹰谷信息科技有限公司 版权所有 沪ICP备13029136号</footer>
+        <div id="login-container " class="login-wrapper " v-show="userData.user_id===- 1 " style="display: none; ">
+            <div class="login-content ">
+                <p class="login-title ">登录</p>
+                <div style="box-sizing: border-box; height: 22px;line-height: 22px; margin-top: 10px; " :class="{errMsg: loginForm.errMsg!='' } " v-html="loginForm.errMsg "></div>
+                <div class="input-line " :class="{active : loginForm.usernameInputFocused} ">
+                    <input type="text " id="username " v-model="userData.account " class="login-input username-input " placeholder="用户名 " @focus="focusInput(1) ">
+                    <i class="username-ico "></i>
+                </div>
+                <div class="input-line " :class="{active : loginForm.passwordInputFocused} ">
+                    <input type="password " id="password " v-model="userData.password " class="login-input password-input " placeholder="密码 " @focus="focusInput(2) ">
+                    <i class="password-ico "></i>
+                </div>
+                <div class="clearfix " style="margin-bottom:10px; ">
+                    <label style="float:left; ">
+                        <input type="checkbox " name="remember " v-model="loginForm.rememberPwd " class="remember-pwd-checkbox "><span>&nbsp;记住密码</span>
+                    </label>
+                    <span class="fr " style="float:right; ">&nbsp;&nbsp;&nbsp;<a href="http://www.integle.com/reset/account ">忘记密码?</a></span>
+                </div>
+                <div class="errorMsg padding-left "></div>
+                <div class="login-btn " @click="doLogin() ">登录</div>
+                <p class="textr mt25 " style="text-align: right;margin-top: 25px; ">还没有账号?&nbsp;&nbsp;
+                    <a href="http://www.integle.com/register/index?referer=http://in.indraw.integle.com ">立即注册</a></p>
+            </div>
+        </div>
     </div>
-    <script type="text/javascript">
+    <script type="text/javascript ">
     $(document).ready(function() {
         // 生成Excel标题单选框
         function generateRadiosHtml(radios, name) {
             var radioHtml = '';
-            for(var key in radios) {
-                radioHtml += '<div class="radio">';
-                radioHtml += '<input type="radio" name="'+name+'" value="'+key+'"/><label>'+radios[key]+'</label>';
+            for (var key in radios) {
+                radioHtml += '<div class="radio ">';
+                radioHtml += '<input type="radio " name=" ' + name + ' " value=" ' + key + ' "/><label>' + radios[key] + '</label>';
                 radioHtml += '</div>';
             }
             return radioHtml;
@@ -302,65 +379,75 @@
                 'is_attachment': 0
             },
             start: function(e) {
-                app.excel.uploaded = false;
-                $('#excel-upload-progress .progress-bar-success').css('width', '0%');
+                app.resetForm();
+
+                $('#excel-upload-progress .progress-bar-success').css('width', '100%');
                 $('#excel-upload-progress .progress-percentage').html('0%');
                 $('#excel-upload-progress').css('display', 'flex');
             },
             done: function(e, data) {
                 var result = data.result;
-                if (result.status == 1) {
-                    app.excel.uploaded = true;
-                    app.excel.titles = result.data.titles;
+                if (result.status === 1) {
+                    app.excel = {
+                        file_path: result.data.task_dir,
+                        file_name: result.data.file_name,
+                        uploaded: true,
+                        titles: result.data.titles
+                    }
 
-                    $('#excel-upload-progress .progress-bar-success').css('width', '100%');
+                    $('#excel-upload-progress .progress-bar-success').css('width', '0%');
                     $('#excel-upload-progress .progress-percentage').html('100%');
 
                     $('#excel-upload').attr('task_dir', result.data.task_dir);
                     $('#excel-upload').attr('file_name', result.data.file_name);
-                    // $('#to-list').html(generateRadiosHtml(result.data.titles, 'to'));
-                    // $('#attachment-excel-col').html(generateRadiosHtml(result.data.titles, 'attachment_excel_col'));
 
                     $('#attachment-upload').fileupload({
                         formData: {
                             'is_attachment': 1,
-                            'PHP_SESSION_UPLOAD_PROGRESS': 'xyz',
                             'task_dir': result.data.task_dir
                         }
                     });
-                    // $('#to-tr, #subject-tr, #body-title-td, #body-content-td, #has-attachment-tr').removeClass('disabled');
                 } else {
                     $.showAlert('Excel文件上传失败');
                 }
             },
             progressall: function(e, data) {
                 var progress = parseInt(data.loaded / data.total * 100, 10);
-                if (progress > 0) {
-                    progress = progress - 1;
+                if (progress > 90) {
+                    progress = 90;
                 }
-                $('#excel-upload-progress .progress-bar-success').css('width', progress + '%');
+                $('#excel-upload-progress .progress-bar-success').css('width', 100 - progress + '%');
                 $('#excel-upload-progress .progress-percentage').html(progress + '%');
             }
         });
 
         // 附件上传
         $('#attachment-upload').fileupload({
-            url: '/email-task/ajax-file-upload',
+            url: 'http://dev.ets.integle.com/client-api/upload-attachment',
             dataType: 'json',
+            formData: {
+                'is_attachment': 0
+            },
             start: function(e) {
-                $('#attachment-upload-progress .progress-bar-success').css('width', '0%');
+                $('#attachment-upload-progress .progress-bar-success').css('width', '100%');
                 $('#attachment-upload-progress .progress-percentage').html('0%');
-                $('#attachment-upload-progress').css('display', 'inline-block');
+                $('#attachment-upload-progress').css('display', 'flex');
             },
             done: function(e, data) {
-                console.log('********************');
                 var result = data.result;
-                if (result.status != 1) {}
+                if (result.status === 1) {
+                    $('#attachment-upload-progress .progress-bar-success').css('width', '0%');
+                    $('#attachment-upload-progress .progress-percentage').html('100%');
+                } else {
+                    $.showAlert('上传失败');
+                }
             },
             progressall: function(e, data) {
-                fetchUploadProgress();
                 var progress = parseInt(data.loaded / data.total * 100, 10);
-                $('#attachment-upload-progress .progress-bar-success').css('width', progress + '%');
+                if (progress > 90) {
+                    progress = 90;
+                }
+                $('#attachment-upload-progress .progress-bar-success').css('width', 100 - progress + '%');
                 $('#attachment-upload-progress .progress-percentage').html(progress + '%');
             }
         });
@@ -368,26 +455,51 @@
 
     const TASKS_PER_PAGE = 10;
     const TASK_STATUS = ['无效', '未提交', '未开始', '进行中', '已完成'];
+
+    var userData = localStorage.getItem('user_data') || {
+        user_id: -1,
+        name: '',
+        account: 'huajun.h.zhu@integle.com',
+        password: 'yg123456'
+    };
+    if (userData && (typeof userData === 'string')) {
+        userData = JSON.parse(userData);
+    }
+    var rememberPwd = localStorage.getItem('remember_pwd') || true;
+
     var app = new Vue({
         el: '#app',
         data: {
-            router: 'create-page',
+            loginForm: {
+                errMsg: '',
+                usernameInputFocused: false,
+                passwordInputFocused: false,
+                rememberPwd: rememberPwd,
+            },
+            userData: userData,
+            router: 'list-page',
+            loadingList: false,
             excel: {
-              uploaded: false,
-              titles: {}
+                file_path: '',
+                file_name: '',
+                uploaded: false,
+                titles: {}
             },
             task: {
                 name: '',
                 sender: {
-                  email: '',
-                  password: '',
-                  smtp: '',
-                  port: ''
+                    sender_email: '',
+                    sender_email_password: '',
+                    smtp: '',
+                    port: '',
+                    encryption: 'tls'
                 },
                 template: {
-                  to: '',
-                  subject: '',
-                  body: ''
+                    to_excel_col: '',
+                    subject: '',
+                    body: '',
+                    attachment_type: '',
+                    attachment_excel_col: ''
                 }
             },
             tasks: {
@@ -397,34 +509,131 @@
                 currentPage: 1,
                 perPage: TASKS_PER_PAGE
             },
-            taskStatus: TASK_STATUS
+            detail: {
+                taskName: '',
+                results: []
+            },
+            taskStatus: TASK_STATUS,
+            errMsg: '',
+            fullscreenLoading: false
         },
+        /*data() {
+            return {
+                fullscreenLoading: false
+            }
+        },*/
         computed: {
 
         },
         methods: {
-            createTask() {
-                console.log('createTask');
-                this.router = 'create-page';
+            focusInput(type) {
+                this.loginForm.usernameInputFocused = false;
+                this.loginForm.passwordInputFocused = false;
+                if (type === 1) {
+                    this.loginForm.usernameInputFocused = true;
+                } else if (type === 2) {
+                    this.loginForm.passwordInputFocused = true;
+                }
             },
-            listTasks() {
-                console.log('listTasks');
-                this.router = 'list-page';
-                this.getTaskList();
+            doLogin() {
+                this.loginForm.errMsg = '';
+                // 验证表单
+                if (this.userData.accoun === '') {
+                    this.loginForm.errMsg = '请输入用户名';
+                    return false;
+                }
+                if (this.userData.password === '') {
+                    this.loginForm.errMsg = '请输入密码';
+                    return false;
+                }
+                // 发送登录请求
+                this.$http.post('http://dev.ets.integle.com/client-api/login', {
+                    account: this.userData.account,
+                    password: hex_md5(this.userData.password)
+                }, {
+                    emulateJSON: true
+                }).then((res) => {
+                    // success callback
+                    let result = JSON.parse(res.bodyText);
+                    if (result.status === 1) {
+                        this.userData.user_id = result.data.user_id;
+                        this.userData.name = result.data.name;
+
+                        localStorage.setItem('remember_pwd', this.rememberPwd);
+                        localStorage.setItem('user_data', JSON.stringify({
+                            user_id: this.userData.user_id,
+                            name: this.userData.name,
+                            account: this.userData.account,
+                            password: (this.rememberPwd ? this.userData.password : '')
+                        }));
+
+                        app.getTaskList(1);
+                    } else {
+                        this.loginForm.errMsg = result.msg;
+                    }
+                }, (res) => {
+                    // error callback
+                });
+            },
+            createTask() {
+                if (this.router != 'create-page') {
+                    if (window.um === undefined) {
+                        var um = UM.getEditor('bodyEditor');
+                        window.um = um;
+                        $('.edui-container').css('z-index', '0');
+                    }
+                    this.resetForm();
+                    this.router = 'create-page';
+                    $('.edui-container').css('width', '100%');
+                    $('.edui-body-container').css('width', '100%');
+                }
+            },
+            testSender() {
+                this.errMsg = '';
+                if (!this.validateSenderConfig()) {
+                    setTimeout(function() {
+                        app.errMsg = '';
+                    }, 1500);
+                    return false;
+                }
+                this.fullscreenLoading = true;
+                this.$http.post('http://dev.ets.integle.com/client-api/test-sender', {
+                    transport: {
+                        sender_email: this.task.sender.sender_email,
+                        sender_email_password: Base64.encode(this.task.sender.sender_email_password),
+                        smtp: this.task.sender.smtp,
+                        port: this.task.sender.port,
+                        encryption: 'tls'
+                    }
+                }, {
+                    emulateJSON: true
+                }).then((res) => {
+                    // success callback
+                    this.fullscreenLoading = false;
+                    let result = JSON.parse(res.bodyText);
+                    if (result.status === 1) {
+                        this.showAlert('success', '提示', result.msg);
+                    } else {
+                        this.showAlert('error', '提示', result.msg);
+                    }
+                }, (res) => {
+                    // error callback
+                });
             },
             getTaskList(page) {
+                this.router = 'list-page';
+                this.loadingList = true;
+
                 this.$http.get('http://dev.ets.integle.com/client-api/list-tasks', {
                     params: {
-                        account: 'huajun.h.zhu@integle.com',
-                        password: hex_md5('yg123456'),
-                        user_id: 14831,
+                        user_id: this.userData.user_id,
                         page: page
                     }
                 }).then((res) => {
                     // success callback
                     let result = JSON.parse(res.bodyText);
                     // console.log(result);
-                    if (result.status == 1) {
+                    if (result.status === 1) {
                         this.tasks = {
                             total: result.data.total,
                             taskArr: result.data.taskArr,
@@ -432,30 +641,210 @@
                             currentPage: page,
                             perPage: TASKS_PER_PAGE
                         }
+                        this.loadingList = false;
                     }
                 }, (res) => {
                     // error callback
                 });
             },
             showTaskProgress(task) {
-                if (task.status <= 2 || task.total_emails == 0) {
+                if (task.status <= 2 || task.total_emails === 0) {
                     return '--';
                 }
                 return ((task.succeed_emails / 1 + task.failed_emails / 1) / task.total_emails * 100).toFixed(2) + '%';
             },
             autoSmtpPort() {
-              var email = this.task.sender.email;
-              // 验证Email格式
-              var re = /^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/;
-              if(!re.test(email)) {
-                  alert('xxxxxxxxxxxxxxxx');
-                  return false;
-              }
+                var email = this.task.sender.sender_email;
+                // 验证Email格式
+                var re = /^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/;
+                if (!re.test(email)) {
+                    return false;
+                }
 
-              var arr = email.split('@');
-              var company = arr[1].substr(0, arr[1].indexOf('.'));
-              this.task.sender.smtp = 'smtp.' + company + '.com';
-              this.task.sender.port = 25;
+                var arr = email.split('@');
+                var company = arr[1].substr(0, arr[1].indexOf('.'));
+                this.task.sender.smtp = 'smtp.' + company + '.com';
+                this.task.sender.port = 25;
+            },
+            create() {
+                if (!this.validateForm()) {
+                    setTimeout(function() {
+                        app.errMsg = '';
+                    }, 1500);
+                    return false;
+                }
+                this.$http.post('http://dev.ets.integle.com/client-api/create-task', {
+                    user_id: this.userData.user_id,
+                    task_data: {
+                        name: this.task.name,
+                        file_path: this.excel.file_path,
+                        excel_file: this.excel.file_name
+                    },
+                    // transport_data: this.task.sender,
+                    transport_data: {
+                        sender_email: this.task.sender.sender_email,
+                        sender_email_password: Base64.encode(this.task.sender.sender_email_password),
+                        smtp: this.task.sender.smtp,
+                        port: this.task.sender.port,
+                        encryption: 'tls'
+                    },
+                    template_data: {
+                        to_excel_col: this.task.template.to_excel_col,
+                        subject: this.task.template.subject,
+                        body: um.getContent(),
+                        attachment_type: this.task.template.attachment_type,
+                        attachment_excel_col: this.task.template.attachment_excel_col
+                    }
+                }, {
+                    emulateJSON: true
+                }).then((res) => {
+                    // success callback
+                    let result = JSON.parse(res.bodyText);
+                    if (result.status === 1) {
+                        console.log(result);
+                        this.showAlert('success', '提示', '新建任务成功，即将进入任务列表页面', function() {
+                            app.getTaskList(1);
+                        });
+                    }
+                }, (res) => {
+                    // error callback
+                });
+            },
+            showAlert(type, title, msg, callback) {
+                this.$alert(msg, title, {
+                    type: type,
+                    confirmButtonText: '确定',
+                    callback: callback
+                });
+            },
+            checkEmail(email) {
+                // 验证Email格式
+                var re = /^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/;
+                return re.test(email);
+            },
+            validateSenderConfig() {
+                this.errMsg = '';
+                if (this.task.sender.sender_email === '') {
+                    this.errMsg = '请输入发件邮箱';
+                    return false;
+                }
+                if (!this.checkEmail(this.task.sender.sender_email)) {
+                    this.errMsg = '邮箱格式不正确';
+                    return false;
+                }
+                if (this.task.sender.sender_email_password === '') {
+                    this.errMsg = '请输入邮箱密码';
+                    return false;
+                }
+                if (this.task.sender.smtp === '') {
+                    this.errMsg = '请输入SMTP服务器';
+                    return false;
+                }
+                if (this.task.sender.port === '') {
+                    this.errMsg = '请输入端口';
+                    return false;
+                }
+
+                return true;
+            },
+            validateForm() {
+                this.errMsg = '';
+                if (this.task.name === '') {
+                    this.errMsg = '请输入任务名称';
+                    return false;
+                }
+                if (!this.validateSenderConfig()) {
+                    return false;
+                }
+                if (this.excel.file_name === '') {
+                    this.errMsg = '请上传Excel文件';
+                    return false;
+                }
+                if (this.task.template.to_excel_col === '') {
+                    this.errMsg = '请选择收件人对应所上传Excel文件中的栏位';
+                    return false;
+                }
+                if (this.task.template.attachment_type === '') {
+                    this.errMsg = '请选择附件类型';
+                    return false;
+                }
+                if (this.task.template.attachment_type === 2 && this.task.template.attachment_excel_col === '') {
+                    this.errMsg = '请选择附件名称对应所上传Excel文件中的栏位';
+                    return false;
+                }
+
+                return true;
+            },
+            showDetail(taskId, page) {
+                this.router = 'detail-page';
+                // this.loadingList = true;
+
+                this.$http.get('http://dev.ets.integle.com/client-api/get-task-detail', {
+                    params: {
+                        task_id: taskId,
+                        page: page
+                    }
+                }).then((res) => {
+                    // success callback
+                    let result = JSON.parse(res.bodyText);
+                    console.log(result);
+                    if (result.status === 1) {
+                        detail = result.data;
+                        this.detail = {
+                            taskName: detail.task.name,
+                            results: detail.results
+                        }
+                    }
+                }, (res) => {
+                    // error callback
+                });
+            },
+            resetForm() {
+                this.task = {
+                    name: '',
+                    sender: {
+                        sender_email: '',
+                        sender_email_password: '',
+                        smtp: '',
+                        port: '',
+                        encryption: 'tls'
+                    },
+                    template: {
+                        to_excel_col: '',
+                        subject: '',
+                        body: '',
+                        attachment_type: '',
+                        attachment_excel_col: ''
+                    }
+                };
+                this.excel = {
+                    file_path: '',
+                    file_name: '',
+                    uploaded: false,
+                    titles: {}
+                };
+                this.task.template = {
+                    to_excel_col: '',
+                    subject: '',
+                    body: '',
+                    attachment_type: '',
+                    attachment_excel_col: ''
+                };
+                this.errMsg = '';
+                $('#excel-upload-progress, #attachment-upload-progress').css('display', 'none');
+                um.execCommand('cleardoc');
+            },
+            showResultStatus(result) {
+                var msg = '';
+                if (result.status == 1) {
+                    msg = '发送成功';
+                    if (result.is_read == 1) {
+                        msg = '发送成功且用户已读';
+                    }
+                } else {
+                    msg = '发送失败';
+                }
+                return msg;
             }
         },
         mounted() {

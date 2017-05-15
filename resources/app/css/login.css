@@ -1,0 +1,226 @@
+@charset "utf-8";
+.login-wrapper {
+    position: fixed;
+    width: 100%;
+    height: 100%;
+    z-index: 99999999999999999999999;
+    top: 0;
+    left: 0;
+    font-family: 'Microsoft YaHei';
+    font-size: 14px;
+    background: rgba(0,0,0,.5);
+    background: radial-gradient(ellipse at center center , rgba(0, 0, 0, 0) 0px, rgba(0, 0, 0, 0.65) 100%) repeat scroll 0 0 rgba(0, 0, 0, 0);
+}
+
+.login-content {
+	position: absolute;
+	width: 385px;
+	padding: 25px 50px 20px 50px;
+	left: 50%;
+	background: #fff;
+	top: 45%;
+	transform: translate(-50%, -50%);
+	-ms-transform: translate(-50%, -50%); 	/* IE 9 */
+	-moz-transform: translate(-50%, -50%); 	/* Firefox */
+	-webkit-transform: translate(-50%, -50%); /* Safari 和 Chrome */
+	-o-transform: translate(-50%, -50%); 	/* Opera */
+	-webkit-box-sizing: border-box;
+    -moz-box-sizing: border-box;
+    box-sizing: border-box;
+}
+
+.login-content p {
+    margin: 5px 0;
+}
+
+.login-content .login-title {
+    font-family: Helvetica, Arial, sans-serif;
+    text-align: center;
+	color: #1388ff;
+	font-size: 24px;
+    margin: 5px 0;
+}
+
+.login-content .errMsg {
+    background: #ffebeb;
+    color: #e4393c;
+    border: 1px solid #faccc6;
+    padding: 0px 10px;
+}
+
+.login-content .input-line {
+    position: relative;
+}
+.login-content .input-line:after {
+	content: '';
+	display: block;
+	width: 40px;
+	height: 36px;
+	background: #e5e5e5;
+	top: 1px;
+	left: 1px;
+	position: absolute;
+	z-index: 1;
+}
+
+.login-content .login-input {
+    width: 100%;
+    display: block;
+    margin-right: 14px;
+    border: 1px solid #dddddd;
+    height: 38px;
+    line-height: 18px;
+    padding: 8px 0 8px 53px;
+    background: #fff;
+	text-indent: 5px;
+	-webkit-box-sizing: border-box;
+    -moz-box-sizing: border-box;
+    box-sizing: border-box;	
+	font-family: "Microsoft YaHei", Helvetica, Arial, sans-serif;
+}
+.login-input:focus {
+    border-color: #1388ff;
+    outline: 0;
+    box-shadow: inset 0 1px 1px rgba(0, 0, 0, .075), 0 0 8px rgba(102, 175, 233, .6);
+}
+
+.login-content .active:after {
+	background: #1388ff;
+}
+
+.login-content .username-input {
+    margin-top: 25px;
+    margin-bottom: 15px;
+}
+
+.login-content .password-input {
+    margin-bottom: 15px;
+}
+
+.username-ico {
+	position: absolute;
+	top: 8px;
+	left: 12px;
+	display: block;
+	width: 18px;
+	height: 22px;
+	background: url(../images/ico.png) -107px -98px;
+	z-index: 2;
+}
+.password-ico {
+	position: absolute;
+	top: 8px;
+	left: 12px;
+	display: block;
+	width: 18px;
+	height: 22px;
+	background: url(../images/ico.png) -125px -98px;
+	z-index: 2;
+}
+.active .username-ico {
+	background: #1388ff url(../images/ico.png) -161px -98px;
+}
+.active .password-ico {
+	background: #1388ff url(../images/ico.png) -143px -98px;
+}
+.active input.login-input {
+	border-color: #1388ff;
+	box-shadow: none;
+}
+.login-content .active:after {
+	background: #1388ff;
+}
+
+.login-content .clearfix::after {
+    clear: both;
+    content: ".";
+    display: block;
+    font-size: 0;
+    height: 0;
+    line-height: 0;
+    visibility: hidden;
+}
+
+.login-content .remember-pwd-checkbox {
+    margin-bottom:10px;
+    vertical-align: middle;
+    margin: -1px 3px 0px 0px;
+    outline: 0;
+    color: #666;
+    font-family: inherit;
+    font-size: 100%;
+    margin: 0;
+    vertical-align: baseline;
+    line-height: inherit;
+    box-sizing: border-box;
+    font-style: normal;
+    outline: none;
+    text-shadow: none;
+    width:13px;
+    height:13px;
+}
+
+.login-content a {
+	color: #1388ff;
+	text-decoration: none;
+}
+.login-content a:hover {
+	color: #0055ab;
+}
+
+.login-content .errorMsg {
+    color: red;
+    text-align: center;
+    line-height: 28px;
+	padding: 0 0 1em 0;
+}
+
+.login-content .login-btn {
+	display: inline-block;
+    width: 100%;
+    line-height: 40px;
+    margin-bottom: 0;
+    font-size: 18px;
+    font-weight: normal;
+    text-align: center;
+    white-space: nowrap;
+    vertical-align: middle;
+    -ms-touch-action: manipulation;
+    touch-action: manipulation;
+    cursor: pointer;
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
+    background-image: none;
+    font-size: 18px;
+	border-radius: 0px;
+    -webkit-box-sizing: border-box;
+    -moz-box-sizing: border-box;
+    box-sizing: border-box;	
+	padding: 6px 21px;
+	background-color: #1388ff;
+	color: #FFFFFF;
+}
+
+.login-content .login-btn:hover {
+	background-color: #0071e3;
+	color: #fff;
+}
+
+/* 英文状态下显示*/
+.EN .login-content{
+    width: 420px;
+}
+.EN .register-form-list .label{
+    width: 150px
+}
+.EN .register-form-list .con {
+    margin-left: 150px;
+}
+.EN .en_ml100{
+	margin-left:100px;
+}
+.EN .ui-box {
+	background: url(/images/login-banner2_en.png) center top no-repeat;
+}

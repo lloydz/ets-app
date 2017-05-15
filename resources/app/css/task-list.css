@@ -55,11 +55,21 @@ td {
 	background-color: #04a9f7;
 }
 
+.btn[action=view-detail] {
+    border: 1px solid #50bfff;
+    background-color: #50bfff;	
+}
+.btn[action=view-detail]:hover {
+    border: 1px solid #73ccff;
+	background-color: #73ccff;
+}
 .btn[action=del-task] {
-    background-color: #f57102;	
+    border: 1px solid #f7ba2a;
+    background-color: #f7ba2a;  
 }
 .btn[action=del-task]:hover {
-	background-color: #e27111;
+    border: 1px solid #f9c855;
+    background-color: #f9c855;
 }
 
 .pagination-container {
@@ -115,4 +125,8 @@ td {
 .pagination > li:last-child {
     border-bottom-right-radius: 3px;
     border-top-right-radius: 3px;
+}
+
+#list-page .el-loading-mask {
+    top: 40px;
 }
