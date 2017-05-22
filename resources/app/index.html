@@ -129,12 +129,9 @@
                             </tr>
                         </tbody>
                     </table>
-                    <div class="pagination-container" v-if="tasks.pages>1">
-                        <ul class="pagination">
-                            <li class="prev" :class="{disabled: (tasks.currentPage===1)}" @click="getTaskList(tasks.currentPage-1)"><span>«</span></li>
-                            <li v-for="p in tasks.pages" :class="{active: (tasks.currentPage===p)}" @click="getTaskList(p)"><span v-html="p"></span></li>
-                            <li class="next" :class="{disabled: (tasks.currentPage===tasks.pages)}" @click="getTaskList(tasks.currentPage+1)"><span>»</span></li>
-                        </ul>
+                    <div class="pagination-container" v-if="tasks.pages.total > tasks.pages.perPage">
+                        <el-pagination :current-page="tasks.pages.currentPage" :page-size="tasks.pages.perPage" layout="total, prev, pager, next, jumper" :total="tasks.pages.total" @current-change="handleTaskPage">
+                        </el-pagination>
                     </div>
                 </div>
                 <div id="create-page" v-show="router==='create-page'" style="display: none;">
@@ -305,67 +302,67 @@
                 <div id="detail-page" v-show="router==='detail-page'" style="display: none;">
                     <div class="detail-container">
                         <div v-html="detail.taskName" style=" height: 45px; font-size: 16px; line-height: 45px; text-align: center; font-weight: bold; background-color: #d27373;"></div>
-                        <table class=" odd-even ">
+                        <table class=" odd-even">
                             <thead>
                                 <tr>
-                                    <th style="width:100px; ">序号</th>
+                                    <th style="width:100px;">序号</th>
                                     <th>收件人</th>
-                                    <th>状态</th>
+                                    <th style="width:200px;">状态</th>
                                 </tr>
-                                <tr v-for="(item, index) in detail.results ">
-                                    <td v-text="index "></td>
-                                    <td v-text="item.to "></td>
-                                    <td v-text="showResultStatus(item) "></td>
+                                <tr v-for="(item, index) in detail.results">
+                                    <td v-text="index"></td>
+                                    <td v-text="item.to"></td>
+                                    <td v-text="showResultStatus(item)"></td>
                                 </tr>
                             </thead>
                         </table>
-                        <div class="pagination-container">
-                            <el-pagination :current-page="2" :page-size="100" layout="total, prev, pager, next, jumper" :total="400">
+                        <div class="pagination-container" v-if="detail.pages.total > detail.pages.perPage">
+                            <el-pagination :current-page="detail.pages.currentPage" :page-size="detail.pages.perPage" layout="total, prev, pager, next, jumper" :total="detail.pages.total" @current-change="handleDetailPage">
                             </el-pagination>
                         </div>
                     </div>
                 </div>
-                <div class="center-alert " v-if="errMsg !='' ">
+                <div class="center-alert" v-if="errMsg !=''">
                     <template>
-                        <el-alert :title="errMsg " type="error " show-icon :closable="false "></el-alert>
+                        <el-alert :title="errMsg" type="error" show-icon :closable="false"></el-alert>
                     </template>
                 </div>
             </div>
         </center>
         <footer>Copyright©2009-2017 上海鹰谷信息科技有限公司 版权所有 沪ICP备13029136号</footer>
-        <div id="login-container " class="login-wrapper " v-show="userData.user_id===- 1 " style="display: none; ">
-            <div class="login-content ">
-                <p class="login-title ">登录</p>
-                <div style="box-sizing: border-box; height: 22px;line-height: 22px; margin-top: 10px; " :class="{errMsg: loginForm.errMsg!='' } " v-html="loginForm.errMsg "></div>
-                <div class="input-line " :class="{active : loginForm.usernameInputFocused} ">
-                    <input type="text " id="username " v-model="userData.account " class="login-input username-input " placeholder="用户名 " @focus="focusInput(1) ">
-                    <i class="username-ico "></i>
+        <div id="login-container" class="login-wrapper" v-show="userData.user_id===- 1" style="display: none;">
+            <div class="login-content" v-loading="loginForm.loginLoading">
+                <p class="login-title">登录</p>
+                <div style="box-sizing: border-box; height: 22px;line-height: 22px; margin-top: 10px;" :class="{errMsg: loginForm.errMsg!='' }" v-html="loginForm.errMsg"></div>
+                <div class="input-line" :class="{active : loginForm.usernameInputFocused}">
+                    <input type="text" id="username" v-model="userData.account" class="login-input username-input" placeholder="用户名" @focus="focusInput(1)">
+                    <i class="username-ico"></i>
                 </div>
-                <div class="input-line " :class="{active : loginForm.passwordInputFocused} ">
-                    <input type="password " id="password " v-model="userData.password " class="login-input password-input " placeholder="密码 " @focus="focusInput(2) ">
-                    <i class="password-ico "></i>
+                <div class="input-line" :class="{active : loginForm.passwordInputFocused}">
+                    <input type="password" id="password" v-model="userData.password" class="login-input password-input" placeholder="密码" @focus="focusInput(2)">
+                    <i class="password-ico"></i>
                 </div>
-                <div class="clearfix " style="margin-bottom:10px; ">
-                    <label style="float:left; ">
-                        <input type="checkbox " name="remember " v-model="loginForm.rememberPwd " class="remember-pwd-checkbox "><span>&nbsp;记住密码</span>
+                <div class="clearfix" style="margin-bottom:10px;">
+                    <label style="float:left;">
+                        <input type="checkbox" name="remember" v-model="loginForm.rememberPwd" class="remember-pwd-checkbox"><span>&nbsp;记住密码</span>
                     </label>
-                    <span class="fr " style="float:right; ">&nbsp;&nbsp;&nbsp;<a href="http://www.integle.com/reset/account ">忘记密码?</a></span>
+                    <span class="fr" style="float:right;">&nbsp;&nbsp;&nbsp;<a href="http://www.integle.com/reset/account">忘记密码?</a></span>
                 </div>
-                <div class="errorMsg padding-left "></div>
-                <div class="login-btn " @click="doLogin() ">登录</div>
-                <p class="textr mt25 " style="text-align: right;margin-top: 25px; ">还没有账号?&nbsp;&nbsp;
-                    <a href="http://www.integle.com/register/index?referer=http://in.indraw.integle.com ">立即注册</a></p>
+                <div class="errorMsg padding-left"></div>
+                <div class="login-btn" @click="doLogin()">登录</div>
+                <p class="textr mt25" style="text-align: right;margin-top: 25px;">还没有账号?&nbsp;&nbsp;
+                    <a href="http://www.integle.com/register/index?referer=http://in.indraw.integle.com">立即注册</a></p>
             </div>
         </div>
     </div>
-    <script type="text/javascript ">
+    <script type="text/javascript">
     $(document).ready(function() {
         // 生成Excel标题单选框
         function generateRadiosHtml(radios, name) {
             var radioHtml = '';
             for (var key in radios) {
-                radioHtml += '<div class="radio ">';
-                radioHtml += '<input type="radio " name=" ' + name + ' " value=" ' + key + ' "/><label>' + radios[key] + '</label>';
+                radioHtml += '<div class="radio">';
+                radioHtml += '<input type="radio" name=" ' + name + '" value=" ' + key + '"/><label>' + radios[key] + '</label>';
                 radioHtml += '</div>';
             }
             return radioHtml;
@@ -454,23 +451,25 @@
     });
 
     const TASKS_PER_PAGE = 10;
+    const DETAIL_PER_PAGE = 10;
     const TASK_STATUS = ['无效', '未提交', '未开始', '进行中', '已完成'];
 
     var userData = localStorage.getItem('user_data') || {
         user_id: -1,
         name: '',
-        account: 'huajun.h.zhu@integle.com',
-        password: 'yg123456'
+        account: '',
+        password: ''
     };
     if (userData && (typeof userData === 'string')) {
         userData = JSON.parse(userData);
     }
-    var rememberPwd = localStorage.getItem('remember_pwd') || true;
+    var rememberPwd = (localStorage.getItem('remember_pwd') === 'true');
 
     var app = new Vue({
         el: '#app',
         data: {
             loginForm: {
+                loginLoading: false,
                 errMsg: '',
                 usernameInputFocused: false,
                 passwordInputFocused: false,
@@ -503,15 +502,22 @@
                 }
             },
             tasks: {
-                total: 0,
                 taskArr: [],
-                pages: 1,
-                currentPage: 1,
-                perPage: TASKS_PER_PAGE
+                pages: {
+                    currentPage: 1,
+                    perPage: TASKS_PER_PAGE,
+                    total: 0
+                }
             },
             detail: {
+                taskId: -1,
                 taskName: '',
-                results: []
+                results: [],
+                pages: {
+                    currentPage: 1,
+                    perPage: DETAIL_PER_PAGE,
+                    total: 0
+                }
             },
             taskStatus: TASK_STATUS,
             errMsg: '',
@@ -547,6 +553,7 @@
                     return false;
                 }
                 // 发送登录请求
+                this.loginForm.loginLoading = true;
                 this.$http.post('http://dev.ets.integle.com/client-api/login', {
                     account: this.userData.account,
                     password: hex_md5(this.userData.password)
@@ -554,17 +561,18 @@
                     emulateJSON: true
                 }).then((res) => {
                     // success callback
+                    this.loginForm.loginLoading = false;
                     let result = JSON.parse(res.bodyText);
                     if (result.status === 1) {
                         this.userData.user_id = result.data.user_id;
                         this.userData.name = result.data.name;
 
-                        localStorage.setItem('remember_pwd', this.rememberPwd);
+                        localStorage.setItem('remember_pwd', this.loginForm.rememberPwd);
                         localStorage.setItem('user_data', JSON.stringify({
                             user_id: this.userData.user_id,
                             name: this.userData.name,
                             account: this.userData.account,
-                            password: (this.rememberPwd ? this.userData.password : '')
+                            password: (this.loginForm.rememberPwd ? this.userData.password : '')
                         }));
 
                         app.getTaskList(1);
@@ -573,6 +581,7 @@
                     }
                 }, (res) => {
                     // error callback
+                    this.loginForm.loginLoading = false;
                 });
             },
             createTask() {
@@ -635,14 +644,50 @@
                     // console.log(result);
                     if (result.status === 1) {
                         this.tasks = {
-                            total: result.data.total,
                             taskArr: result.data.taskArr,
-                            pages: Math.ceil(result.data.total / TASKS_PER_PAGE),
-                            currentPage: page,
-                            perPage: TASKS_PER_PAGE
+                            pages: {
+                                currentPage: page,
+                                perPage: TASKS_PER_PAGE,
+                                total: parseInt(result.data.total, 10)
+                            }
                         }
                         this.loadingList = false;
+                        this.autoUpdateProgress();
                     }
+                }, (res) => {
+                    // error callback
+                });
+            },
+            autoUpdateProgress() {
+                var taskIds = [];
+                for (let task of this.tasks.taskArr) {
+                    if (task['status'] == 2 || task['status'] == 3) {
+                        taskIds.push(task['id']);
+                    }
+                }
+                if (taskIds.length === 0) {
+                    return;
+                }
+
+                this.$http.post('http://dev.ets.integle.com/client-api/get-tasks-progeress', {
+                    task_ids: taskIds
+                }, {
+                    emulateJSON: true
+                }).then((res) => {
+                    // success callback
+                    let result = JSON.parse(res.bodyText);
+                    if (result.status === 1) {
+                        for (let task of result.data) {
+                            this.tasks.taskArr.forEach((item, i) => {
+                                if (item['id'] == task['id']) {
+                                    this.tasks.taskArr[i]['status'] = task['status'];
+                                    this.tasks.taskArr[i]['succeed_emails'] = task['succeed_emails'];
+                                    this.tasks.taskArr[i]['failed_emails'] = task['failed_emails'];
+                                }
+                            });
+                        }
+                    }
+                    setTimeout(app.autoUpdateProgress, 3000);
                 }, (res) => {
                     // error callback
                 });
@@ -717,6 +762,14 @@
                     callback: callback
                 });
             },
+            showConfirm(type, title, msg, callback) {
+                this.$confirm(msg, title, {
+                    confirmButtonText: '确定',
+                    cancelButtonText: '取消',
+                    type: type,
+                    callback: callback
+                });
+            },
             checkEmail(email) {
                 // 验证Email格式
                 var re = /^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/;
@@ -775,6 +828,29 @@
 
                 return true;
             },
+            delTask(taskId) {
+                this.showConfirm('warning', '提示', '确认删除任务?', (action) => {
+                    if (action == 'confirm') {
+                        this.$http.post('http://dev.ets.integle.com/client-api/del-task', {
+                            task_id: taskId
+                        }, {
+                            emulateJSON: true
+                        }).then((res) => {
+                            // success callback
+                            let result = JSON.parse(res.bodyText);
+                            if (result.status === 1) {
+                                this.showAlert('success', '提示', '删除任务成功', function() {
+                                    app.getTaskList(1);
+                                });
+                            } else {
+                                this.showAlert('error', '提示', result.msg, function() {});
+                            }
+                        }, (res) => {
+                            // error callback
+                        });
+                    }
+                });
+            },
             showDetail(taskId, page) {
                 this.router = 'detail-page';
                 // this.loadingList = true;
@@ -791,8 +867,14 @@
                     if (result.status === 1) {
                         detail = result.data;
                         this.detail = {
+                            taskId: detail.task.id,
                             taskName: detail.task.name,
-                            results: detail.results
+                            results: detail.results,
+                            pages: {
+                                currentPage: page,
+                                perPage: DETAIL_PER_PAGE,
+                                total: parseInt(detail.total, 10)
+                            }
                         }
                     }
                 }, (res) => {
@@ -845,11 +927,19 @@
                     msg = '发送失败';
                 }
                 return msg;
+            },
+            handleTaskPage(page) {
+                this.getTaskList(page);
+            },
+            handleDetailPage(page) {
+                this.showDetail(this.detail.taskId, page);
             }
         },
         mounted() {
             this.$nextTick(() => {
-                this.getTaskList(1);
+                if (this.userData.user_id != -1) {
+                    this.getTaskList(1);
+                }
             });
         }
     });
