@@ -370,7 +370,7 @@
 
         // Excel文件上传
         $('#excel-upload').fileupload({
-            url: 'http://dev.ets.integle.com/client-api/upload-excel',
+            url: INTERFACE_URL + '/upload-excel',
             dataType: 'json',
             formData: {
                 'is_attachment': 0
@@ -420,7 +420,7 @@
 
         // 附件上传
         $('#attachment-upload').fileupload({
-            url: 'http://dev.ets.integle.com/client-api/upload-attachment',
+            url: INTERFACE_URL + '/upload-attachment',
             dataType: 'json',
             formData: {
                 'is_attachment': 0
@@ -453,6 +453,7 @@
     const TASKS_PER_PAGE = 10;
     const DETAIL_PER_PAGE = 10;
     const TASK_STATUS = ['无效', '未提交', '未开始', '进行中', '已完成'];
+    const INTERFACE_URL = 'http://dev.ets.integle.com/client-api';
 
     var userData = localStorage.getItem('user_data') || {
         user_id: -1,
@@ -554,7 +555,7 @@
                 }
                 // 发送登录请求
                 this.loginForm.loginLoading = true;
-                this.$http.post('http://dev.ets.integle.com/client-api/login', {
+                this.$http.post(INTERFACE_URL + '/login', {
                     account: this.userData.account,
                     password: hex_md5(this.userData.password)
                 }, {
@@ -606,7 +607,7 @@
                     return false;
                 }
                 this.fullscreenLoading = true;
-                this.$http.post('http://dev.ets.integle.com/client-api/test-sender', {
+                this.$http.post(INTERFACE_URL + '/test-sender', {
                     transport: {
                         sender_email: this.task.sender.sender_email,
                         sender_email_password: Base64.encode(this.task.sender.sender_email_password),
@@ -633,7 +634,7 @@
                 this.router = 'list-page';
                 this.loadingList = true;
 
-                this.$http.get('http://dev.ets.integle.com/client-api/list-tasks', {
+                this.$http.get(INTERFACE_URL + '/list-tasks', {
                     params: {
                         user_id: this.userData.user_id,
                         page: page
@@ -669,7 +670,7 @@
                     return;
                 }
 
-                this.$http.post('http://dev.ets.integle.com/client-api/get-tasks-progeress', {
+                this.$http.post(INTERFACE_URL + '/get-tasks-progeress', {
                     task_ids: taskIds
                 }, {
                     emulateJSON: true
@@ -718,7 +719,7 @@
                     }, 1500);
                     return false;
                 }
-                this.$http.post('http://dev.ets.integle.com/client-api/create-task', {
+                this.$http.post(INTERFACE_URL + '/create-task', {
                     user_id: this.userData.user_id,
                     task_data: {
                         name: this.task.name,
@@ -831,7 +832,7 @@
             delTask(taskId) {
                 this.showConfirm('warning', '提示', '确认删除任务?', (action) => {
                     if (action == 'confirm') {
-                        this.$http.post('http://dev.ets.integle.com/client-api/del-task', {
+                        this.$http.post(INTERFACE_URL + '/del-task', {
                             task_id: taskId
                         }, {
                             emulateJSON: true
@@ -855,7 +856,7 @@
                 this.router = 'detail-page';
                 // this.loadingList = true;
 
-                this.$http.get('http://dev.ets.integle.com/client-api/get-task-detail', {
+                this.$http.get(INTERFACE_URL + '/get-task-detail', {
                     params: {
                         task_id: taskId,
                         page: page
