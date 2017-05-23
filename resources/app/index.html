@@ -376,7 +376,7 @@
                 'is_attachment': 0
             },
             start: function(e) {
-                app.resetForm();
+                app.resetTemplate();
 
                 $('#excel-upload-progress .progress-bar-success').css('width', '100%');
                 $('#excel-upload-progress .progress-percentage').html('0%');
@@ -453,7 +453,7 @@
     const TASKS_PER_PAGE = 10;
     const DETAIL_PER_PAGE = 10;
     const TASK_STATUS = ['无效', '未提交', '未开始', '进行中', '已完成'];
-    const INTERFACE_URL = 'http://dev.ets.integle.com/client-api';
+    const INTERFACE_URL = 'http://ets.ineln.com/client-api';
 
     var userData = localStorage.getItem('user_data') || {
         user_id: -1,
@@ -682,6 +682,7 @@
                             this.tasks.taskArr.forEach((item, i) => {
                                 if (item['id'] == task['id']) {
                                     this.tasks.taskArr[i]['status'] = task['status'];
+                                    this.tasks.taskArr[i]['total_emails'] = task['total_emails'];
                                     this.tasks.taskArr[i]['succeed_emails'] = task['succeed_emails'];
                                     this.tasks.taskArr[i]['failed_emails'] = task['failed_emails'];
                                 }
@@ -747,9 +748,11 @@
                     // success callback
                     let result = JSON.parse(res.bodyText);
                     if (result.status === 1) {
-                        console.log(result);
                         this.showAlert('success', '提示', '新建任务成功，即将进入任务列表页面', function() {
                             app.getTaskList(1);
+                        });
+                    } else {
+                        this.showAlert('error', '提示', result.msg, function() {
                         });
                     }
                 }, (res) => {
@@ -883,23 +886,10 @@
                 });
             },
             resetForm() {
-                this.task = {
-                    name: '',
-                    sender: {
-                        sender_email: '',
-                        sender_email_password: '',
-                        smtp: '',
-                        port: '',
-                        encryption: 'tls'
-                    },
-                    template: {
-                        to_excel_col: '',
-                        subject: '',
-                        body: '',
-                        attachment_type: '',
-                        attachment_excel_col: ''
-                    }
-                };
+                this.task.name = '';
+                this.resetTemplate();
+            },
+            resetTemplate() {
                 this.excel = {
                     file_path: '',
                     file_name: '',
