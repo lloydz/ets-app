@@ -307,7 +307,7 @@
             </div>
         </center>
         <footer>Copyright©2009-2017 上海鹰谷信息科技有限公司 版权所有 沪ICP备13029136号</footer>
-        <div id="login-container" class="login-wrapper" v-show="userData.user_id===- 1" style="display: none;">
+        <div id="login-container" class="login-wrapper" v-show="onLine && userData.user_id===-1" style="display: none;">
             <div class="login-content" v-loading="loginForm.loginLoading">
                 <p class="login-title">登录</p>
                 <div style="box-sizing: border-box; height: 22px;line-height: 22px; margin-top: 10px;" :class="{errMsg: loginForm.errMsg!='' }" v-html="loginForm.errMsg"></div>
@@ -488,6 +488,7 @@
     var app = new Vue({
         el: '#app',
         data: {
+            onLine: navigator.onLine,
             loginForm: {
                 loginLoading: false,
                 errMsg: '',
@@ -956,8 +957,12 @@
         },
         mounted() {
             this.$nextTick(() => {
-                if (this.userData.user_id != -1) {
-                    this.getTaskList(1);
+                if (!this.onLine) {
+                    this.showAlert('warning', '提示', '当前没有网络连接，无法使用', function() {});
+                } else {
+                    if (this.userData.user_id != -1) {
+                        this.getTaskList(1);
+                    }
                 }
             });
         }
