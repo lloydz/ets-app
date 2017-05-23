@@ -55,7 +55,7 @@ label.title {
     font-weight: bold;
     text-align: left;
     padding: 15px;
-    background: #42b983;
+    background: #18d7e2;
 }
 
 .part-fields {
@@ -186,7 +186,7 @@ label.title {
     position: absolute;
     display: inline-block;
     padding: 5px 10px;
-    background-color: #2048ff;
+    background-color: #e0740a;
     border-radius: 3px;
     text-decoration: none;
     color: white;

@@ -169,7 +169,7 @@
                         <!-- <div class="part-title">邮件模板配置</div> -->
                         <table class="form-table">
                             <tr>
-                                <th colspan="2" class="table-title ta-left">邮件模板配置</th>
+                                <th colspan="2" class="table-title ta-left" style="background-color: #18d7e2;">邮件模板配置</th>
                             </tr>
                             <tr>
                                 <td class="ta-left" style="min-width:200px;">
@@ -316,7 +316,7 @@
                     <i class="username-ico"></i>
                 </div>
                 <div class="input-line" :class="{active : loginForm.passwordInputFocused}">
-                    <input type="password" id="password" v-model="userData.password" class="login-input password-input" placeholder="密码" @focus="focusInput(2)">
+                    <input type="password" id="password" v-model="userData.password" class="login-input password-input" placeholder="密码" @focus="focusInput(2)" @keyup.13="doLogin">
                     <i class="password-ico"></i>
                 </div>
                 <div class="clearfix" style="margin-bottom:10px;">
@@ -326,7 +326,7 @@
                     <span class="fr" style="float:right;">&nbsp;&nbsp;&nbsp;<a href="javascript:;" @click="findPwd">忘记密码?</a></span>
                 </div>
                 <div class="errorMsg padding-left"></div>
-                <div class="login-btn" @click="doLogin()">登录</div>
+                <div class="login-btn" @click="doLogin">登录</div>
                 <p class="textr mt25" style="text-align: right;margin-top: 25px;">还没有账号?&nbsp;&nbsp;
                     <a href="javascript:;" @click="register">立即注册</a></p>
             </div>
