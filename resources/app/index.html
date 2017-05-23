@@ -20,41 +20,13 @@
         overflow: hidden;
     }
     </style>
-    <script>
-    if (typeof module === 'object') {
-        window.module = module;
-        module = undefined;
-    }
-    </script>
-    <script type="text/javascript" src="https://at.alicdn.com/t/font_fz0yc9mm1gb0ggb9.js"></script>
-    <script type="text/javascript" src="./js/lib/md5.js"></script>
-    <script type="text/javascript" src="./js/lib/vue.js"></script>
-    <script type="text/javascript" src="./js/lib/vue-resource.js"></script>
-    <script type="text/javascript" src="./js/lib/jquery-3.1.1.js"></script>
-    <script type="text/javascript" src="./js/lib/jquery-file-upload/jquery.ui.widget.js"></script>
-    <script type="text/javascript" src="./js/lib/jquery-file-upload/jquery.fileupload.js"></script>
-    <script type="text/javascript" src="./js/lib/base64-min.js"></script>
-    <script type="text/javascript" src="./js/common.js"></script>
-    <script type="text/javascript" src="./js/modal.js"></script>
-    <script>
-    if (window.module) module = window.module;
-    </script>
-    <!-- <script type="text/javascript" src="umeditor/third-party/jquery.min.js"></script> -->
-    <script type="text/javascript" src="umeditor/third-party/template.min.js"></script>
-    <script type="text/javascript" src="umeditor/umeditor.config.js"></script>
-    <script type="text/javascript" src="umeditor/editor_api.js"></script>
-    <script type="text/javascript" src="umeditor/lang/zh-cn/zh-cn.js"></script>
-    <!-- 引入样式 -->
-    <link rel="stylesheet" href="https://unpkg.com/element-ui/lib/theme-default/index.css">
-    <!-- 引入组件库 -->
-    <script src="https://unpkg.com/element-ui/lib/index.js"></script>
 </head>
 
 <body>
     <div id="app">
         <header>
             <div class="header-left">
-                <a class="logo-link" href="http://www.integle.com">
+                <a class="logo-link" href="javascript:;" @click="goIntegle">
                     <img class="logo-img" src="./images/logo.png">
                 </a>
                 <span class="app-title">InETS</span>
@@ -109,12 +81,17 @@
                             </tr>
                         </thead>
                         <tbody>
-                            <tr v-if="tasks.taskArr.length===0">
+                            <tr v-show="loadingList && tasks.taskArr.length===0">
+                                <td colspan="8">
+                                    加载中...
+                                </td>
+                            </tr>
+                            <tr v-show="!loadingList && tasks.taskArr.length===0" style="display: none;">
                                 <td colspan="8">
                                     您还没有任务 <a href="javascript:;" @click="createTask()">新建任务</a>
                                 </td>
                             </tr>
-                            <tr v-for="task in tasks.taskArr">
+                            <tr v-for="task in tasks.taskArr" v-show="tasks.taskArr.length>0" style="display: none;">
                                 <td v-html="task.name"></td>
                                 <td v-html="taskStatus[task.status]"></td>
                                 <td v-html="(task.status<=2) ? '--' : task.total_emails"></td>
@@ -310,7 +287,7 @@
                                     <th style="width:200px;">状态</th>
                                 </tr>
                                 <tr v-for="(item, index) in detail.results">
-                                    <td v-text="index"></td>
+                                    <td v-text="index+1"></td>
                                     <td v-text="item.to"></td>
                                     <td v-text="showResultStatus(item)"></td>
                                 </tr>
@@ -346,15 +323,43 @@
                     <label style="float:left;">
                         <input type="checkbox" name="remember" v-model="loginForm.rememberPwd" class="remember-pwd-checkbox"><span>&nbsp;记住密码</span>
                     </label>
-                    <span class="fr" style="float:right;">&nbsp;&nbsp;&nbsp;<a href="http://www.integle.com/reset/account">忘记密码?</a></span>
+                    <span class="fr" style="float:right;">&nbsp;&nbsp;&nbsp;<a href="javascript:;" @click="findPwd">忘记密码?</a></span>
                 </div>
                 <div class="errorMsg padding-left"></div>
                 <div class="login-btn" @click="doLogin()">登录</div>
                 <p class="textr mt25" style="text-align: right;margin-top: 25px;">还没有账号?&nbsp;&nbsp;
-                    <a href="http://www.integle.com/register/index?referer=http://in.indraw.integle.com">立即注册</a></p>
+                    <a href="javascript:;" @click="register">立即注册</a></p>
             </div>
         </div>
     </div>
+    <script>
+    if (typeof module === 'object') {
+        window.module = module;
+        module = undefined;
+    }
+    </script>
+    <script type="text/javascript" src="https://at.alicdn.com/t/font_fz0yc9mm1gb0ggb9.js"></script>
+    <script type="text/javascript" src="./js/lib/md5.js"></script>
+    <script type="text/javascript" src="./js/lib/vue.js"></script>
+    <script type="text/javascript" src="./js/lib/vue-resource.js"></script>
+    <script type="text/javascript" src="./js/lib/jquery-3.1.1.js"></script>
+    <script type="text/javascript" src="./js/lib/jquery-file-upload/jquery.ui.widget.js"></script>
+    <script type="text/javascript" src="./js/lib/jquery-file-upload/jquery.fileupload.js"></script>
+    <script type="text/javascript" src="./js/lib/base64-min.js"></script>
+    <script type="text/javascript" src="./js/common.js"></script>
+    <script type="text/javascript" src="./js/modal.js"></script>
+    <script>
+    if (window.module) module = window.module;
+    </script>
+    <!-- <script type="text/javascript" src="umeditor/third-party/jquery.min.js"></script> -->
+    <script type="text/javascript" src="umeditor/third-party/template.min.js"></script>
+    <script type="text/javascript" src="umeditor/umeditor.config.js"></script>
+    <script type="text/javascript" src="umeditor/editor_api.js"></script>
+    <script type="text/javascript" src="umeditor/lang/zh-cn/zh-cn.js"></script>
+    <!-- 引入样式 -->
+    <link rel="stylesheet" href="element_ui/index.css">
+    <!-- 引入组件库 -->
+    <script src="element_ui/index.js"></script>
     <script type="text/javascript">
     $(document).ready(function() {
         // 生成Excel标题单选框
@@ -477,6 +482,9 @@
         sender = JSON.parse(sender);
     }
 
+    var electron = require("electron");
+    var shell = electron.shell;
+
     var app = new Vue({
         el: '#app',
         data: {
@@ -489,7 +497,7 @@
             },
             userData: userData,
             router: 'list-page',
-            loadingList: false,
+            loadingList: true,
             excel: {
                 file_path: '',
                 file_name: '',
@@ -935,6 +943,15 @@
             },
             handleDetailPage(page) {
                 this.showDetail(this.detail.taskId, page);
+            },
+            goIntegle() {
+                shell.openExternal('http://www.integle.com');
+            },
+            register() {
+                shell.openExternal('http://www.integle.com/register/index');
+            },
+            findPwd() {
+                shell.openExternal('http://www.integle.com/reset/account');
             }
         },
         mounted() {
