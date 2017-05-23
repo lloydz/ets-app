@@ -237,7 +237,7 @@
                             <tr id="subject-tr" :class="{disabled: !excel.uploaded}">
                                 <td class="ta-left">
                                     <label>邮件主题</label>
-                                    <span class="tip-icon" data-tip="提示：如果主题中想包含个性化信息，如：课题名称,请这样输入<%课题名称%>"></span>
+                                    <span class="tip-icon" data-tip="提示：如果主题中想包含个性化信息，如：课题名称,请这样输入{{课题名称}}"></span>
                                 </td>
                                 <td>
                                     <input id="subject" type="text" v-model="task.template.subject" class="field-input" style="width:100%;text-align:left;" />
@@ -246,7 +246,7 @@
                             <tr id="body-tr" :class="{disabled: !excel.uploaded}">
                                 <td id="body-title-td" class="ta-left">
                                     <label>邮件正文</label>
-                                    <span class="tip-icon" data-width="300px" data-tip="提示：如果正文中想包含个性化信息，如：课题名称,请这样输入<%课题名称%>；
+                                    <span class="tip-icon" data-width="300px" data-tip="提示：如果正文中想包含个性化信息，如：课题名称,请这样输入{{课题名称}}；
                       如果需要对个性化信息进行样式选择，如：加粗、调整字体大小颜色,请对个性化信息整体（包含左右的双大括号）选中后进行样式操作；双大括号和其中的个性化信息请手动输入，尽量不要复制粘贴，否则可能会影响显示样式"></span>
                                 </td>
                                 <td id="body-content-td" class="ta-left">
@@ -466,6 +466,17 @@
     }
     var rememberPwd = (localStorage.getItem('remember_pwd') === 'true');
 
+    var sender = localStorage.getItem('sender') || {
+        sender_email: '',
+        sender_email_password: '',
+        smtp: '',
+        port: '',
+        encryption: 'tls'
+    };
+    if (sender && (typeof sender === 'string')) {
+        sender = JSON.parse(sender);
+    }
+
     var app = new Vue({
         el: '#app',
         data: {
@@ -487,13 +498,7 @@
             },
             task: {
                 name: '',
-                sender: {
-                    sender_email: '',
-                    sender_email_password: '',
-                    smtp: '',
-                    port: '',
-                    encryption: 'tls'
-                },
+                sender: sender,
                 template: {
                     to_excel_col: '',
                     subject: '',
@@ -622,6 +627,13 @@
                     this.fullscreenLoading = false;
                     let result = JSON.parse(res.bodyText);
                     if (result.status === 1) {
+                        localStorage.setItem('sender', JSON.stringify({
+                            sender_email: this.task.sender.sender_email,
+                            sender_email_password: this.task.sender.sender_email_password,
+                            smtp: this.task.sender.smtp,
+                            port: this.task.sender.port,
+                            encryption: 'tls'
+                        }));
                         this.showAlert('success', '提示', result.msg);
                     } else {
                         this.showAlert('error', '提示', result.msg);
@@ -752,8 +764,7 @@
                             app.getTaskList(1);
                         });
                     } else {
-                        this.showAlert('error', '提示', result.msg, function() {
-                        });
+                        this.showAlert('error', '提示', result.msg, function() {});
                     }
                 }, (res) => {
                     // error callback
