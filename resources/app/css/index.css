@@ -48,6 +48,76 @@ header {
   top: 7px;
   left: 125px;
 }
+
+.header-right {
+	float: right;
+	font-family: 'verdana, simsun';
+	font-size: 13px;
+}
+
+.header-right .account {
+    float: left;
+    color: #fff;
+    text-decoration: none;
+}
+
+.header-right .account:before {
+    content: "";
+    height: 18px;
+    width: 18px;
+    display: inline-block;
+    vertical-align: middle;
+    margin-right: 5px;
+    background: url(../images/icons.png) -18px -191px;
+}
+
+.header-right .seperator {
+    float: left;
+    width: 1px;
+    height: 34px;
+    margin: 7px 20px;
+}
+
+.header-right .seperator:before, .header-right .seperator:after {
+    content: "";
+    position: absolute;
+    width: 1px;
+    height: 17px;
+    float: left;
+    display: block;
+}
+
+.header-right .seperator:before {
+    background: -ms-linear-gradient(top, #2e323d, #515662);/* IE9+*/
+    background-image: -moz-linear-gradient(top, #2e323d, #515662); /* Firefox */
+    background-image: -webkit-gradient(linear, left top, left bottom, color-stop(0, #2e323d), color-stop(1, #515662)); /* Saf4+, Chrome */
+    filter: progid:DXImageTransform.Microsoft.gradient(startColorstr='#2e323d', endColorstr='#515662', GradientType='0'); /* IE9*/
+}
+
+.header-right .seperator:after {
+    top: 24px;
+    background: -ms-linear-gradient(top, #515662, #2e323d);/* IE9+*/
+    background-image: -moz-linear-gradient(top, #515662, #2e323d); /* Firefox */
+    background-image: -webkit-gradient(linear, left top, left bottom, color-stop(0, #515662), color-stop(1, #2e323d)); /* Saf4+, Chrome */
+    filter: progid:DXImageTransform.Microsoft.gradient(startColorstr='#515662', endColorstr='#2e323d', GradientType='0'); /* IE*/
+    -ms-filter: "progid:DXImageTransform.Microsoft.gradient (GradientType=0, startColorstr=#515662, endColorstr=#2e323d)";/* IE8+*/
+}
+
+.header-right .exit {
+    float: left;
+    color: #fff;
+    text-decoration: none;
+}
+
+.header-right .exit:before {
+    content: "";
+    height: 18px;
+    width: 18px;
+    display: inline-block;
+    vertical-align: middle;
+    margin-right: 5px;
+    background: url(../images/icons.png) -36px -191px;
+}
 /*header区域 结束*/
 
 /*center区域 开始*/

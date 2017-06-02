@@ -31,7 +31,16 @@
                 </a>
                 <span class="app-title">InETS</span>
             </div>
-            <div class="header-right"></div>
+            <div class="header-right" v-show="userData.user_id!=-1" style="display: none;">
+                <a class="account" href="javascript:;">
+                    <span v-text="userData.account"></span>
+                </a>
+                <div class="seperator"></div>
+                <a class="exit" href="javascript:;" @click="doLogout()">
+                    <span>退出</span>
+                </a>
+                <div class="seperator"></div>
+            </div>
         </header>
         <center>
             <div class="sidebar">
@@ -598,6 +607,13 @@
                     // error callback
                     this.loginForm.loginLoading = false;
                 });
+            },
+            doLogout() {
+                this.userData.user_id = -1;
+                if(!this.loginForm.rememberPwd) {
+                    this.userData.password = '';
+                }
+                localStorage.setItem('user_data', JSON.stringify(this.userData));
             },
             createTask() {
                 if (this.router != 'create-page') {
